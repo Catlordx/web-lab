@@ -120,7 +120,7 @@ const App = () => {
         </div>
         <div className="mt-4 bg-gray-400 flex flex-col md:flex-row w-full">
           <div className="w-full md:w-1/2 text-center my-2">
-            <Button variant="text" sx={{ color: "white" }}>忘记密码</Button>
+            <Button variant="text" sx={{ color: "white" }}>注册用户</Button>
           </div>
 
           <div className="w-full md:w-1/2 text-center my-2">
