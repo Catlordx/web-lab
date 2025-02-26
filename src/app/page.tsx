@@ -9,7 +9,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { QQIcon, AlipayIcon, WeChatIcon } from "./components/icons";
+import { QQIcon, AlipayIcon, WeChatIcon } from "../components/icons";
 
 
 const App = () => {
