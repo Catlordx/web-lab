@@ -159,13 +159,15 @@ export default function HomeLayout({
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-              Admin Dashboard
+              图书管理系统
             </Typography>
-            <IconButton color="inherit">
-              <Badge badgeContent={4} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+            <Tooltip title="通知">
+              <IconButton color="inherit">
+                <Badge badgeContent={4} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+            </Tooltip>
             <Tooltip title="主题色配置">
               <IconButton
                 size="small"
@@ -239,9 +241,11 @@ export default function HomeLayout({
                 </Box>
               </MenuItem>
             </Menu>
-            <IconButton color="inherit">
-              <AccountCircleIcon />
-            </IconButton>
+            <Tooltip title="账户">
+              <IconButton color="inherit">
+                <AccountCircleIcon />
+              </IconButton>
+            </Tooltip>
           </Toolbar>
         </AppBar>
         <Drawer
