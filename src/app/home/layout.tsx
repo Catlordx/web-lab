@@ -139,7 +139,7 @@ export default function HomeLayout({
   }
   const menuItems = [
     { text: '仪表盘', icon: <DashboardIcon />, path: '/home' },
-    { text: '用户管理', icon: <PeopleIcon />, path: '/users' },
+    { text: '用户管理', icon: <PeopleIcon />, path: '/home/users' },
     { text: '设置', icon: <SettingsIcon />, path: '/settings' },
   ];
 

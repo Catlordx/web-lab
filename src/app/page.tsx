@@ -7,20 +7,93 @@ import {
   Divider,
   IconButton,
   InputAdornment,
+  Snackbar,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { QQIcon, AlipayIcon, WeChatIcon } from "../components/icons";
+import { useRouter } from "next/navigation";
 
 
 const App = () => {
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  // 添加到现有state定义中
+  const [notification, setNotification] = useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error' | 'warning' | 'info'
+  });
 
+  // 处理通知关闭
+  const handleCloseNotification = () => {
+    setNotification({ ...notification, open: false });
+  };
   const handleClickShowPassword = () => setShowPassword(!showPassword);
-  const handleLogin = (e: { preventDefault: () => void; }) => {
+  const handleLogin = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
-    console.log("Login with:", username, password);
+    // console.log("Login with:", username, password);
+    setError("")
+    if (!username.trim()) {
+      setError("请输入用户名")
+      return;
+    }
+    if (!password) {
+      setError("请输入密码")
+      return;
+    }
+    try {
+      setLoading(true);
+      const resp = await fetch('http://localhost:8080/authenticate/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username, password })
+      });
+
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.message || '登录失败，请检查用户名和密码');
+      }
+
+      if (data.token) {
+        localStorage.setItem('authToken', data.token);
+        console.log(localStorage.getItem('authToken'));
+
+        // 显示登录成功提示
+        setNotification({
+          open: true,
+          message: '登录成功！正在跳转...',
+          severity: 'success'
+        });
+
+        // 延迟跳转，让用户能看到成功提示
+        setTimeout(() => {
+          router.push('/home')
+        }, 1000);
+      } else {
+        throw new Error('登录成功但未收到有效令牌');
+      }
+    } catch (err: any) {
+      console.error("登录错误:", err);
+      setError(err.message || "登录失败请稍后再试");
+
+      // 显示登录失败提示
+      setNotification({
+        open: true,
+        message: err.message || "登录失败，请稍后再试",
+        severity: 'error'
+      });
+    } finally {
+      setLoading(false);
+    }
+
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -29,12 +102,11 @@ const App = () => {
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center p-4 bg-gray-50">
-      <Paper elevation={3} className="w-full max-w-4xl overflow-hidden">
+      <Paper elevation={3} className="w-full md:w-1/2 max-w-4xl overflow-hidden">
         <div className="justify-center flex items-center h-16 bg-primary text-2xl">
           <span>登录</span>
         </div>
         <div className="flex flex-col md:flex-row">
-          {/* 社交登录部分 - 在小屏幕上在上方显示 */}
           <div className="px-8 flex flex-col justify-center items-center space-y-4 md:w-1/2 mb-4 md:mb-0">
             <Button
               variant="outlined"
@@ -74,6 +146,11 @@ const App = () => {
           {/* 账号密码登录部分 */}
           <div className="px-8 flex flex-col justify-center items-center md:w-1/2 mt-4 md:mt-0">
             <form onSubmit={handleLogin} className="space-y-4">
+              {error && (
+                <div className="text-red-500 text-sm p-2 bg-red-50 rounded border border-red-200">
+                  {error}
+                </div>
+              )}
               <TextField
                 label="用户名"
                 variant="outlined"
@@ -112,22 +189,40 @@ const App = () => {
                 size="large"
                 fullWidth
                 className="mt-6 h-10"
+                loading={loading}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                登录
-              </Button>
+                {loading ? "登录中..." : "登录"}              </Button>
             </form>
           </div>
         </div>
-        <div className="mt-4 bg-gray-400 flex flex-col md:flex-row w-full">
-          <div className="w-full md:w-1/2 text-center my-2">
+        <div className="mt-4 bg-gray-400 flex flex-col md:flex-row md:mt-2 w-full">
+          <div className="w-full md:w-1/2 text-center mt-0 md:my-2">
             <Button variant="text" sx={{ color: "white" }}>注册用户</Button>
           </div>
 
-          <div className="w-full md:w-1/2 text-center my-2">
+          <div className="w-full md:w-1/2 text-center mb-0 md:my-2">
             <Button variant="text" sx={{ color: 'white' }}>修改密码</Button>
           </div>
         </div>
       </Paper>
+      {/* 添加到return语句的最后 */}
+      <Snackbar
+        open={notification.open}
+        autoHideDuration={6000}
+        onClose={handleCloseNotification}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseNotification}
+          severity={notification.severity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {notification.message}
+        </Alert>
+      </Snackbar>
+
     </div>
   );
 };
