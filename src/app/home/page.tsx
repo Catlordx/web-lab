@@ -326,69 +326,6 @@ export default function HomePage() {
 
       </Grid>
 
-      {/* Charts */}
-      {/* <Grid container spacing={3}>
-        <Grid item xs={12} md={8}>
-          <ChartContainer>
-            <Typography variant="h6" gutterBottom>
-              Weekly Revenue
-            </Typography>
-            <Box sx={{
-              flexGrow: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Typography variant="body2" color="text.secondary">
-                Chart visualization would go here (requires Chart.js or other library)
-              </Typography>
-            </Box>
-          </ChartContainer>
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <ChartContainer>
-            <Typography variant="h6" gutterBottom>
-              Traffic Sources
-            </Typography>
-            <Box sx={{
-              flexGrow: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}>
-              <Typography variant="body2" color="text.secondary">
-                Pie chart would go here
-              </Typography>
-            </Box>
-          </ChartContainer>
-        </Grid>
-        <Grid item xs={12}>
-          <ChartContainer>
-            <Typography variant="h6" gutterBottom>
-              Recent Activity
-            </Typography>
-            <Box sx={{
-              p: 2,
-              bgcolor: 'background.paper',
-              borderRadius: 1,
-              mt: 2
-            }}>
-              <Typography variant="body2" sx={{ py: 1 }}>
-                User John Smith completed purchase - 12 minutes ago
-              </Typography>
-              <Typography variant="body2" sx={{ py: 1 }}>
-                New user registration: Sarah Johnson - 45 minutes ago
-              </Typography>
-              <Typography variant="body2" sx={{ py: 1 }}>
-                Inventory alert: Product SKU-1234 low stock - 1 hour ago
-              </Typography>
-              <Typography variant="body2" sx={{ py: 1 }}>
-                System update completed successfully - 3 hours ago
-              </Typography>
-            </Box>
-          </ChartContainer>
-        </Grid>
-      </Grid> */}
     </Container>
   );
 }
