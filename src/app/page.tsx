@@ -47,53 +47,49 @@ const App = () => {
       setError("请输入密码")
       return;
     }
-    try {
-      setLoading(true);
-      const resp = await fetch('http://localhost:8080/authenticate/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ username, password })
-      });
+    setLoading(true)
+    const req_data = {
+      username: username,
+      password: password,
+      type: "username"
+    }
+    const resp = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req_data)
+    });
 
-      const data = await resp.json();
-      if (!resp.ok) {
-        throw new Error(data.message || '登录失败，请检查用户名和密码');
-      }
-
-      if (data.token) {
-        localStorage.setItem('authToken', data.token);
-        console.log(localStorage.getItem('authToken'));
-
-        // 显示登录成功提示
-        setNotification({
-          open: true,
-          message: '登录成功！正在跳转...',
-          severity: 'success'
-        });
-
-        // 延迟跳转，让用户能看到成功提示
-        setTimeout(() => {
-          router.push('/home')
-        }, 1000);
-      } else {
-        throw new Error('登录成功但未收到有效令牌');
-      }
-    } catch (err: any) {
-      console.error("登录错误:", err);
-      setError(err.message || "登录失败请稍后再试");
-
+    const data = await resp.json();
+    if (!resp.ok) {
+      setError(data.message);
       // 显示登录失败提示
       setNotification({
         open: true,
-        message: err.message || "登录失败，请稍后再试",
+        message: data.message || "登录失败，请稍后再试",
         severity: 'error'
       });
-    } finally {
-      setLoading(false);
+      setLoading(false)
+      return;
     }
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+      console.log(localStorage.getItem('authToken'));
 
+      // 显示登录成功提示
+      setNotification({
+        open: true,
+        message: '登录成功！正在跳转...',
+        severity: 'success'
+      });
+
+      // 延迟跳转，让用户能看到成功提示
+      setTimeout(() => {
+        router.push('/home')
+      }, 500);
+      setLoading(false)
+    }
   };
 
   const handleSocialLogin = (provider: string) => {
@@ -192,7 +188,8 @@ const App = () => {
                 loading={loading}
                 startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
               >
-                {loading ? "登录中..." : "登录"}              </Button>
+                {loading ? "登录中..." : "登录"}
+              </Button>
             </form>
           </div>
         </div>

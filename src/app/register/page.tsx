@@ -1,19 +1,51 @@
 "use client";
-import { CloudUpload} from "@mui/icons-material";
-import { Button, Divider, IconButton, Paper, TextField } from "@mui/material"
+import { CloudUpload } from "@mui/icons-material";
+import { Button, CircularProgress, Divider, IconButton, Paper, TextField } from "@mui/material"
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from "dayjs";
+import { useRouter } from "next/navigation";
 
 import { useState } from "react";
 
 const RegisterPage = () => {
 
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [cardId, setCardId] = useState("");
+  const [loading, setLoading] = useState(false)
 
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleRegister = async (e: { preventDefault: () => void; }) => {
+    e.preventDefault()
+    setLoading(true)
+    const req_data = {
+      username: username,
+      cardId: cardId,
+      password: password,
+    }
+    const resp = await fetch('http://localhost:8080/api/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(req_data)
+    })
+
+    if (resp.status === 201) {
+      alert("注册成功")
+      setLoading(false)
+      router.push("/")
+    }
+    else {
+      alert("注册失败")
+      setLoading(false)
+    }
+
+  }
+  // const handleClickShowPassword = () => setShowPassword(!showPassword);
+
   return (
 
     <div className="w-full min-h-screen flex items-center justify-center p-4 bg-gray-50">
@@ -23,13 +55,15 @@ const RegisterPage = () => {
         </div>
         <div className="flex flex-col md:flex-row">
           <div className="px-8 flex flex-col justify-center items-center md:w-1/2">
-            <form className="space-y-4 mb-4 md:mb-0">
+            <form onSubmit={handleRegister} className="space-y-4 mb-4 md:mb-0">
               <TextField
                 label="用户名"
                 variant="outlined"
                 size="small"
+                value={username}
                 fullWidth
                 required
+                onChange={(e) => setUsername(e.target.value)}
               />
 
               <TextField
@@ -44,10 +78,12 @@ const RegisterPage = () => {
               />
 
               <TextField
-                label="邮箱"
+                label="校园卡号"
                 variant="outlined"
                 size="small"
                 fullWidth
+                value={cardId}
+                onChange={(e) => setCardId(e.target.value)}
                 required
               />
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -62,6 +98,18 @@ const RegisterPage = () => {
                   </div>
                 </LocalizationProvider>
               </LocalizationProvider>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                size="large"
+                fullWidth
+                className="mt-6 h-10"
+                loading={loading}
+                startIcon={loading ? <CircularProgress size={20} color="inherit" /> : null}
+              >
+                {loading ? "登录中..." : "登录"}
+              </Button>
             </form>
           </div>
           <Divider orientation="vertical" flexItem className="hidden  md:block" />

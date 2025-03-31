@@ -62,6 +62,8 @@ const UserManagementPage = () => {
   ];
 
   // 状态管理
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [users, setUsers] = useState<User[]>(dummyUsers);
   const [filteredUsers, setFilteredUsers] = useState<User[]>(dummyUsers);
   const [search, setSearch] = useState('');
@@ -222,8 +224,8 @@ const UserManagementPage = () => {
           <Chip
             label={
               type === 'student' ? '学生' :
-              type === 'teacher' ? '教师' :
-              type === 'staff' ? '职工' : '其他'
+                type === 'teacher' ? '教师' :
+                  type === 'staff' ? '职工' : '其他'
             }
             color={typeColors[type] as any}
             size="small"
@@ -248,7 +250,7 @@ const UserManagementPage = () => {
           <Chip
             label={
               status === 'active' ? '正常' :
-              status === 'suspended' ? '暂停' : '锁定'
+                status === 'suspended' ? '暂停' : '锁定'
             }
             color={statusColors[status] as any}
             size="small"
@@ -562,13 +564,13 @@ const UserManagementPage = () => {
                 <Chip
                   label={
                     selectedUser.type === 'student' ? '学生' :
-                    selectedUser.type === 'teacher' ? '教师' :
-                    selectedUser.type === 'staff' ? '职工' : '其他'
+                      selectedUser.type === 'teacher' ? '教师' :
+                        selectedUser.type === 'staff' ? '职工' : '其他'
                   }
                   color={
                     selectedUser.type === 'student' ? 'primary' :
-                    selectedUser.type === 'teacher' ? 'secondary' :
-                    selectedUser.type === 'staff' ? 'info' : 'default'
+                      selectedUser.type === 'teacher' ? 'secondary' :
+                        selectedUser.type === 'staff' ? 'info' : 'default'
                   }
                   size="small"
                   variant="outlined"
@@ -580,11 +582,11 @@ const UserManagementPage = () => {
                 <Chip
                   label={
                     selectedUser.status === 'active' ? '正常' :
-                    selectedUser.status === 'suspended' ? '暂停' : '锁定'
+                      selectedUser.status === 'suspended' ? '暂停' : '锁定'
                   }
                   color={
                     selectedUser.status === 'active' ? 'success' :
-                    selectedUser.status === 'suspended' ? 'warning' : 'error'
+                      selectedUser.status === 'suspended' ? 'warning' : 'error'
                   }
                   size="small"
                 />
