@@ -27,6 +27,8 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Link from 'next/link';
 import { Button, Menu, MenuItem, Tooltip } from '@mui/material';
 import { TuneOutlined } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
+import useUserStore from '@/store/userStore';
 
 const drawerWidth = 240;
 
@@ -143,6 +145,31 @@ export default function HomeLayout({
     { text: '设置', icon: <SettingsIcon />, path: '/settings' },
   ];
 
+  // Add below the existing menu state variables (around line 118)
+  const [settingsAnchorEl, setSettingsAnchorEl] = React.useState<null | HTMLElement>(null);
+  const settingsMenuOpen = Boolean(settingsAnchorEl);
+
+  const handleSettingsMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setSettingsAnchorEl(event.currentTarget);
+  };
+
+  const handleSettingsMenuClose = () => {
+    setSettingsAnchorEl(null);
+  };
+  const router = useRouter();
+  const handleLogout = () => {
+    useUserStore.getState().setUser({
+      name: '',
+      email: '',
+      phone: '',
+      balance: '',
+      brithday: '',
+    })
+    localStorage.removeItem('authToken');
+    handleSettingsMenuClose();
+    router.push('/')
+  };
+
   return (
     <ThemeProvider theme={usedTheme}>
       <Box sx={{ display: 'flex' }}>
@@ -239,10 +266,54 @@ export default function HomeLayout({
               </IconButton>
             </Tooltip>
             <Tooltip title="设置">
-              <IconButton color="inherit">
+              <IconButton
+                color="inherit"
+                onClick={handleSettingsMenuOpen}
+                aria-controls={settingsMenuOpen ? 'settings-menu' : undefined}
+                aria-haspopup="true"
+                aria-expanded={settingsMenuOpen ? 'true' : undefined}
+              >
                 <SettingsIcon />
               </IconButton>
             </Tooltip>
+            <Menu
+              anchorEl={settingsAnchorEl}
+              id="settings-menu"
+              open={settingsMenuOpen}
+              onClose={handleSettingsMenuClose}
+              onClick={handleSettingsMenuClose}
+              slotProps={{
+                paper: {
+                  elevation: 0,
+                  sx: {
+                    overflow: 'visible',
+                    filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                    mt: 1.5,
+                    '&::before': {
+                      content: '""',
+                      display: 'block',
+                      position: 'absolute',
+                      top: 0,
+                      right: 14,
+                      width: 10,
+                      height: 10,
+                      bgcolor: 'background.paper',
+                      transform: 'translateY(-50%) rotate(45deg)',
+                      zIndex: 0,
+                    },
+                  },
+                },
+              }}
+              transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+            >
+              <MenuItem onClick={handleLogout}>
+                <ListItemIcon>
+                  <ChevronRightIcon fontSize="small" />
+                </ListItemIcon>
+                退出
+              </MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
         <Drawer
