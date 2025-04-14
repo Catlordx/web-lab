@@ -21,14 +21,11 @@ import ListItemText from '@mui/material/ListItemText';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
-import NotificationsIcon from '@mui/icons-material/Notifications';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import PaletteIcon from '@mui/icons-material/Palette';
-import Badge from '@mui/material/Badge';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Link from 'next/link';
 import { Button, Menu, MenuItem, Tooltip } from '@mui/material';
-import { text } from 'stream/consumers';
 import { TuneOutlined } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -142,7 +139,7 @@ export default function HomeLayout({
   const menuItems = [
     { text: '首页', icon: <DashboardIcon />, path: '/home' },
     { text: '功能菜单', icon: <TuneOutlined />, path: '/home/functions' },
-    { text: '用户管理', icon: <PeopleIcon />, path: '/home/users' },
+    { text: '联系人管理', icon: <PeopleIcon />, path: '/home/users' },
     { text: '设置', icon: <SettingsIcon />, path: '/settings' },
   ];
 

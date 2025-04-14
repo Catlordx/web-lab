@@ -17,8 +17,6 @@ const RegisterPage = () => {
   const [cardId, setCardId] = useState("");
   const [loading, setLoading] = useState(false)
 
- 
-
   const handleRegister = async (e: { preventDefault: () => void; }) => {
     e.preventDefault()
     setLoading(true)
@@ -38,7 +36,6 @@ const RegisterPage = () => {
     if (resp.status === 201) {
       alert("注册成功")
       setLoading(false)
-
       router.push("/")
     }
     else {

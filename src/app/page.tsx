@@ -24,7 +24,8 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
-  const { setUser } = useUserStore()
+  const setUser = useUserStore((state) => state.setUser);
+  // const user = useUserStore((state) => state.user)
   // 添加到现有state定义中
   const [notification, setNotification] = useState({
     open: false,
@@ -75,14 +76,16 @@ const App = () => {
       setLoading(false)
       return;
     }
+    setUsername(data.username)
     if (data.token) {
       localStorage.setItem('authToken', data.token);
       console.log(localStorage.getItem('authToken'));
+      console.log(data);
+
       setUser({
-        name: username,
+        name: data.username,
         email: data.email,
-        balance: data.balance,
-        birthdate: data.birthdate,
+        phone: data.phonenumber,
       })
 
 

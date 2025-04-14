@@ -1,5 +1,5 @@
 'use client'
-import { Box, Container, Paper, Typography } from '@mui/material';
+import { Box, Card, Container, Paper, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2'
 import Image from 'next/image';
 import useUserStore from '@/store/userStore';
@@ -24,12 +24,16 @@ const HomePage = () => {
                 用户基本信息
               </Typography>
             </center>
-            <div className='flex flex-col w-full space-y-2'>
-              {selfInfoCell("用户名", user.username)}
+            {/* <div className='flex flex-col w-full space-y-2'>
+              {selfInfoCell("用户名", user.name)}
               {selfInfoCell("邮箱", user.email)}
               {selfInfoCell("手机号", user.phone)}
-              {selfInfoCell("地址", user.address)}
-            </div>
+            </div> */}
+            <Card className='flex flex-col w-full space-y-2 mt-8'>
+              {selfInfoCell("用户名", user.name)}
+              {selfInfoCell("邮箱", user.email)}
+              {selfInfoCell("手机号", user.phone)}
+            </Card>
           </Container>
         </Grid>
       </Grid>
