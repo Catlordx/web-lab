@@ -28,6 +28,8 @@ import Badge from '@mui/material/Badge';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import Link from 'next/link';
 import { Button, Menu, MenuItem, Tooltip } from '@mui/material';
+import { text } from 'stream/consumers';
+import { TuneOutlined } from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -138,7 +140,8 @@ export default function HomeLayout({
     setAnchorEl(null);
   }
   const menuItems = [
-    { text: '仪表盘', icon: <DashboardIcon />, path: '/home' },
+    { text: '首页', icon: <DashboardIcon />, path: '/home' },
+    { text: '功能菜单', icon: <TuneOutlined />, path: '/home/functions' },
     { text: '用户管理', icon: <PeopleIcon />, path: '/home/users' },
     { text: '设置', icon: <SettingsIcon />, path: '/settings' },
   ];
@@ -159,15 +162,7 @@ export default function HomeLayout({
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-              图书管理系统
             </Typography>
-            <Tooltip title="通知">
-              <IconButton color="inherit">
-                <Badge badgeContent={4} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-            </Tooltip>
             <Tooltip title="主题色配置">
               <IconButton
                 size="small"
@@ -244,6 +239,11 @@ export default function HomeLayout({
             <Tooltip title="账户">
               <IconButton color="inherit">
                 <AccountCircleIcon />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="设置">
+              <IconButton color="inherit">
+                <SettingsIcon />
               </IconButton>
             </Tooltip>
           </Toolbar>

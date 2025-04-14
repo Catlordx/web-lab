@@ -14,6 +14,7 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { QQIcon, AlipayIcon, WeChatIcon } from "../components/icons";
 import { useRouter } from "next/navigation";
+import useUserStore from "@/store/userStore";
 
 
 const App = () => {
@@ -23,6 +24,7 @@ const App = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const { setUser } = useUserStore()
   // 添加到现有state定义中
   const [notification, setNotification] = useState({
     open: false,
@@ -76,6 +78,13 @@ const App = () => {
     if (data.token) {
       localStorage.setItem('authToken', data.token);
       console.log(localStorage.getItem('authToken'));
+      setUser({
+        name: username,
+        email: data.email,
+        balance: data.balance,
+        birthdate: data.birthdate,
+      })
+
 
       // 显示登录成功提示
       setNotification({

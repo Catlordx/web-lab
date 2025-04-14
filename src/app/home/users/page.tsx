@@ -39,33 +39,21 @@ import AccountBoxIcon from '@mui/icons-material/AccountBox';
 interface User {
   id: number;
   name: string;
-  username: string;
   email: string;
   phone: string;
   borrowedBooks: number;
   status: 'active' | 'suspended' | 'blocked';
-  registrationDate: string;
   type: 'student' | 'teacher' | 'staff' | 'other';
 }
 
 const UserManagementPage = () => {
-  // 模拟用户数据
-  const dummyUsers: User[] = [
-    { id: 1, name: '张三', username: 'zhangsan', email: 'zhangsan@example.com', phone: '13800138001', borrowedBooks: 3, status: 'active', registrationDate: '2023-11-15', type: 'student' },
-    { id: 2, name: '李四', username: 'lisi', email: 'lisi@example.com', phone: '13800138002', borrowedBooks: 1, status: 'active', registrationDate: '2023-10-20', type: 'teacher' },
-    { id: 3, name: '王五', username: 'wangwu', email: 'wangwu@example.com', phone: '13800138003', borrowedBooks: 0, status: 'suspended', registrationDate: '2023-12-05', type: 'student' },
-    { id: 4, name: '赵六', username: 'zhaoliu', email: 'zhaoliu@example.com', phone: '13800138004', borrowedBooks: 5, status: 'active', registrationDate: '2024-01-10', type: 'staff' },
-    { id: 5, name: '陈七', username: 'chenqi', email: 'chenqi@example.com', phone: '13800138005', borrowedBooks: 2, status: 'blocked', registrationDate: '2023-09-28', type: 'student' },
-    { id: 6, name: '刘八', username: 'liuba', email: 'liuba@example.com', phone: '13800138006', borrowedBooks: 0, status: 'active', registrationDate: '2024-02-15', type: 'teacher' },
-    { id: 7, name: '孙九', username: 'sunjiu', email: 'sunjiu@example.com', phone: '13800138007', borrowedBooks: 1, status: 'active', registrationDate: '2023-08-12', type: 'student' },
-    { id: 8, name: '周十', username: 'zhoushi', email: 'zhoushi@example.com', phone: '13800138008', borrowedBooks: 0, status: 'suspended', registrationDate: '2023-07-30', type: 'other' },
-  ];
-
   // 状态管理
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [users, setUsers] = useState<User[]>(dummyUsers);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>(dummyUsers);
+  // const [users, setUsers] = useState<User[]>(dummyUsers);
+  // const [filteredUsers, setFilteredUsers] = useState<User[]>(dummyUsers);
+  const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [search, setSearch] = useState('');
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
@@ -75,7 +63,6 @@ const UserManagementPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [newUser, setNewUser] = useState<Partial<User>>({
     name: '',
-    username: '',
     email: '',
     phone: '',
     status: 'active',
@@ -86,34 +73,69 @@ const UserManagementPage = () => {
     message: '',
     severity: 'success' as 'success' | 'error' | 'info' | 'warning'
   });
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await fetch('http://localhost:8080/api/users', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      if (!response.ok) {
+        throw new Error('网络错误，请稍后再试');
+      }
+      const data = await response.json();
+      const formattedUsers: User[] = data.map((user: any) => ({
+        id: user.cardId,
+        name: user.name,
+        email: user.email || '',
+        phone: user.phone || '',
+        borrowedBooks: user.borrowedBooks || 0,
+        status: user.status || 'active',
+        type: user.userType || 'student'
+      }))
+
+      setUsers(formattedUsers);
+      setFilteredUsers(formattedUsers);
+    } catch (err: any) {
+      setError(err.message || '获取用户数据时出错');
+      showSnackbar('获取用户数据失败: ' + err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // 过滤用户数据
   useEffect(() => {
-    let result = users;
+    fetchUsers();
+  }, [])
+  // useEffect(() => {
+  //   let result = users;
 
-    // 搜索过滤
-    if (search) {
-      const searchLower = search.toLowerCase();
-      result = result.filter(user =>
-        user.name.toLowerCase().includes(searchLower) ||
-        user.username.toLowerCase().includes(searchLower) ||
-        user.email.toLowerCase().includes(searchLower)
-      );
-    }
+  //   // 搜索过滤
+  //   if (search) {
+  //     const searchLower = search.toLowerCase();
+  //     result = result.filter(user =>
+  //       user.name.toLowerCase().includes(searchLower) ||
+  //       user.email.toLowerCase().includes(searchLower)
+  //     );
+  //   }
 
-    // 状态过滤
-    if (statusFilter !== 'all') {
-      result = result.filter(user => user.status === statusFilter);
-    }
+  //   // 状态过滤
+  //   if (statusFilter !== 'all') {
+  //     result = result.filter(user => user.status === statusFilter);
+  //   }
 
-    setFilteredUsers(result);
-  }, [users, search, statusFilter]);
+  //   setFilteredUsers(result);
+  // }, [users, search, statusFilter]);
 
   // 打开添加用户对话框
   const handleAddUserClick = () => {
     setNewUser({
       name: '',
-      username: '',
       email: '',
       phone: '',
       status: 'active',
@@ -143,7 +165,6 @@ const UserManagementPage = () => {
     setSelectedUser(user);
     setNewUser({
       name: user.name,
-      username: user.username,
       email: user.email,
       phone: user.phone,
       status: user.status,
@@ -202,16 +223,45 @@ const UserManagementPage = () => {
   };
 
   // 表格列定义
+  // 表格列定义 - 使用flex属性实现响应式列宽
   const columns: GridColDef[] = [
-    { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'name', headerName: '姓名', width: 100 },
-    { field: 'username', headerName: '用户名', width: 120 },
-    { field: 'email', headerName: '电子邮件', width: 180 },
-    { field: 'phone', headerName: '电话', width: 130 },
+    {
+      field: 'id',
+      headerName: 'ID',
+      flex: 0.7,
+      minWidth: 80,
+      headerAlign: 'center',
+      align: 'center'
+    },
+    {
+      field: 'name',
+      headerName: '姓名',
+      flex: 0.8,
+      minWidth: 90,
+      headerAlign: 'center',
+      align: 'center'
+    },
+    {
+      field: 'email',
+      headerName: '电子邮件',
+      flex: 1.8,
+      minWidth: 180
+    },
+    {
+      field: 'phone',
+      headerName: '电话',
+      flex: 1,
+      minWidth: 120,
+      headerAlign: 'center',
+      align: 'center'
+    },
     {
       field: 'type',
       headerName: '用户类型',
-      width: 100,
+      flex: 0.9,
+      minWidth: 100,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params: GridRenderCellParams<User>) => {
         const typeColors = {
           student: 'primary',
@@ -234,11 +284,21 @@ const UserManagementPage = () => {
         );
       }
     },
-    { field: 'borrowedBooks', headerName: '借阅数量', width: 100 },
+    {
+      field: 'borrowedBooks',
+      headerName: '借阅数量',
+      flex: 0.7,
+      minWidth: 90,
+      headerAlign: 'center',
+      align: 'center'
+    },
     {
       field: 'status',
       headerName: '状态',
-      width: 100,
+      flex: 0.8,
+      minWidth: 90,
+      headerAlign: 'center',
+      align: 'center',
       renderCell: (params: GridRenderCellParams<User>) => {
         const statusColors = {
           active: 'success',
@@ -258,13 +318,14 @@ const UserManagementPage = () => {
         );
       }
     },
-    { field: 'registrationDate', headerName: '注册日期', width: 110 },
     {
       field: 'actions',
       headerName: '操作',
-      width: 150,
+      flex: 1,
+      minWidth: 120,
+      headerAlign: 'center',
       renderCell: (params: GridRenderCellParams<User>) => (
-        <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5, width: '100%' }}>
           <IconButton
             size="small"
             color="primary"
@@ -290,6 +351,92 @@ const UserManagementPage = () => {
       )
     }
   ];
+  // const columns: GridColDef[] = [
+  //   { field: 'id', headerName: 'ID', width: 100 },
+  //   { field: 'name', headerName: '姓名', width: 70 },
+  //   { field: 'email', headerName: '电子邮件', width: 180 },
+  //   { field: 'phone', headerName: '电话', width: 130 },
+  //   {
+  //     field: 'type',
+  //     headerName: '用户类型',
+  //     width: 100,
+  //     renderCell: (params: GridRenderCellParams<User>) => {
+  //       const typeColors = {
+  //         student: 'primary',
+  //         teacher: 'secondary',
+  //         staff: 'info',
+  //         other: 'default'
+  //       };
+  //       const type = params.row.type;
+  //       return (
+  //         <Chip
+  //           label={
+  //             type === 'student' ? '学生' :
+  //               type === 'teacher' ? '教师' :
+  //                 type === 'staff' ? '职工' : '其他'
+  //           }
+  //           color={typeColors[type] as any}
+  //           size="small"
+  //           variant="outlined"
+  //         />
+  //       );
+  //     }
+  //   },
+  //   { field: 'borrowedBooks', headerName: '借阅数量', width: 100 },
+  //   {
+  //     field: 'status',
+  //     headerName: '状态',
+  //     width: 100,
+  //     renderCell: (params: GridRenderCellParams<User>) => {
+  //       const statusColors = {
+  //         active: 'success',
+  //         suspended: 'warning',
+  //         blocked: 'error'
+  //       };
+  //       const status = params.row.status;
+  //       return (
+  //         <Chip
+  //           label={
+  //             status === 'active' ? '正常' :
+  //               status === 'suspended' ? '暂停' : '锁定'
+  //           }
+  //           color={statusColors[status] as any}
+  //           size="small"
+  //         />
+  //       );
+  //     }
+  //   },
+  //   {
+  //     field: 'actions',
+  //     headerName: '操作',
+  //     width: 150,
+  //     renderCell: (params: GridRenderCellParams<User>) => (
+  //       <Box>
+  //         <IconButton
+  //           size="small"
+  //           color="primary"
+  //           onClick={() => handleViewDetails(params.row)}
+  //         >
+  //           <VisibilityIcon fontSize="small" />
+  //         </IconButton>
+  //         <IconButton
+  //           size="small"
+  //           color="primary"
+  //           onClick={() => handleEditUser(params.row)}
+  //         >
+  //           <EditIcon fontSize="small" />
+  //         </IconButton>
+  //         <IconButton
+  //           size="small"
+  //           color="error"
+  //           onClick={() => handleDeleteClick(params.row)}
+  //         >
+  //           <DeleteIcon fontSize="small" />
+  //         </IconButton>
+  //       </Box>
+  //     )
+  //   }
+  // ];
 
   return (
     <Box sx={{ p: 3 }}>
@@ -360,8 +507,39 @@ const UserManagementPage = () => {
                 quickFilterProps: { debounceMs: 500 },
               },
             }}
+            localeText={{
+              MuiTablePagination: {
+                labelRowsPerPage: '每页行数:',
+                labelDisplayedRows: ({ from, to, count }) =>
+                  `${from}-${to} 共 ${count !== -1 ? count : `超过 ${to}`}`
+              },
+              toolbarDensity: '密度',
+              toolbarDensityLabel: '密度',
+              toolbarDensityCompact: '紧凑',
+              toolbarDensityStandard: '标准',
+              toolbarDensityComfortable: '舒适',
+              toolbarColumns: '列',
+              toolbarColumnsLabel: '选择列',
+              toolbarFilters: '筛选器',
+              toolbarFiltersLabel: '显示筛选器',
+              toolbarFiltersTooltipHide: '隐藏筛选器',
+              toolbarFiltersTooltipShow: '显示筛选器',
+              toolbarQuickFilterPlaceholder: '搜索...',
+              toolbarExport: '导出',
+              toolbarExportLabel: '导出',
+              toolbarExportCSV: '导出为CSV',
+              toolbarExportPrint: '打印',
+              // columnsPanelTextFieldLabel: '查找列',
+              // columnsPanelTextFieldPlaceholder: '列名',
+              // columnsPanelDragIconLabel: '重排列',
+              // columnsPanelShowAllButton: '显示所有',
+              // columnsPanelHideAllButton: '隐藏所有',
+              // ...更多本地化文本
+            }}
           />
+
         </Box>
+
       </Paper>
 
       {/* 添加用户对话框 */}
@@ -377,13 +555,6 @@ const UserManagementPage = () => {
               fullWidth
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              required
-            />
-            <TextField
-              label="用户名"
-              fullWidth
-              value={newUser.username}
-              onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
               required
             />
             <TextField
@@ -434,7 +605,7 @@ const UserManagementPage = () => {
           <Button
             onClick={handleAddUser}
             variant="contained"
-            disabled={!newUser.name || !newUser.username || !newUser.email}
+            disabled={!newUser.name || !newUser.email}
           >
             添加
           </Button>
@@ -451,13 +622,6 @@ const UserManagementPage = () => {
               fullWidth
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              required
-            />
-            <TextField
-              label="用户名"
-              fullWidth
-              value={newUser.username}
-              onChange={(e) => setNewUser({ ...newUser, username: e.target.value })}
               required
             />
             <TextField
@@ -508,7 +672,7 @@ const UserManagementPage = () => {
           <Button
             onClick={handleSaveEdit}
             variant="contained"
-            disabled={!newUser.name || !newUser.username || !newUser.email}
+            disabled={!newUser.name || !newUser.email}
           >
             保存
           </Button>
@@ -542,11 +706,6 @@ const UserManagementPage = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
                 <Typography variant="body2" color="text.secondary">ID</Typography>
                 <Typography variant="body1">{selectedUser.id}</Typography>
-              </Box>
-
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">用户名</Typography>
-                <Typography variant="body1">{selectedUser.username}</Typography>
               </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -592,10 +751,6 @@ const UserManagementPage = () => {
                 />
               </Box>
 
-              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">注册日期</Typography>
-                <Typography variant="body1">{selectedUser.registrationDate}</Typography>
-              </Box>
 
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2" color="text.secondary">当前借阅</Typography>
