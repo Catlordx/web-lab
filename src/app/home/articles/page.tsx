@@ -14,7 +14,8 @@ import {
   Box,
   CircularProgress,
   useMediaQuery,
-  useTheme
+  useTheme,
+  Button
 } from "@mui/material";
 import { BarChart } from '@mui/x-charts/BarChart';
 
@@ -100,6 +101,7 @@ const ArticlesManagementPage = () => {
                       <TableCell>ID</TableCell>
                       <TableCell>作者名</TableCell>
                       <TableCell align="right">文章数</TableCell>
+                      <TableCell align="center">操作</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -108,6 +110,13 @@ const ArticlesManagementPage = () => {
                         <TableCell>{author.id}</TableCell>
                         <TableCell>{author.name}</TableCell>
                         <TableCell align="right">{author.articleCount}</TableCell>
+                        <TableCell align="center">
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => alert(`编辑作者 ${author.name}`)}
+                            >进入文章管理</Button>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
