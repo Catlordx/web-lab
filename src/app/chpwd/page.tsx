@@ -1,15 +1,29 @@
 "use client";
-import { Alert, Button, Divider, Paper, Snackbar, TextField } from "@mui/material"
+import {
+  Alert,
+  Button,
+  Divider,
+  Paper,
+  Snackbar,
+  TextField,
+  IconButton,
+  InputAdornment
+} from "@mui/material"
+import { Visibility, VisibilityOff } from "@mui/icons-material"
 import { useState } from "react"
 import { useRouter } from "next/navigation";
 
 const ChangePasswordPage: React.FC = () => {
-  const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Individual password visibility states
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // Replace useSnackbar with direct state management
   const [notification, setNotification] = useState({
@@ -19,8 +33,6 @@ const ChangePasswordPage: React.FC = () => {
   });
 
   const router = useRouter();
-
-  const handleClickShowPassword = () => setShowPassword(!showPassword);
 
   const handleCloseNotification = () => {
     setNotification({ ...notification, open: false });
@@ -63,7 +75,7 @@ const ChangePasswordPage: React.FC = () => {
         setTimeout(() => router.push("/"), 1500);
       }
     } catch (error) {
-      showMessage("请求失败，请检查网络连接", "error");
+      showMessage(`${error}`, "error");
     } finally {
       setLoading(false);
     }
@@ -91,13 +103,26 @@ const ChangePasswordPage: React.FC = () => {
 
               <TextField
                 label="旧密码"
-                type={showPassword ? "text" : "password"}
+                type={showOldPassword ? "text" : "password"}
                 variant="outlined"
                 size="small"
                 fullWidth
                 value={oldPassword}
                 onChange={(e) => setOldPassword(e.target.value)}
                 required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                        edge="end"
+                      >
+                        {showOldPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
             </form>
           </div>
@@ -111,24 +136,50 @@ const ChangePasswordPage: React.FC = () => {
             <form className="space-y-4 mt-4 md:mt-0">
               <TextField
                 label="请输入新密码"
-                type={showPassword ? "text" : "password"}
+                type={showNewPassword ? "text" : "password"}
                 variant="outlined"
                 size="small"
                 value={newPassword}
                 fullWidth
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        edge="end"
+                      >
+                        {showNewPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
 
               <TextField
                 label="请再次确认密码"
-                type={showPassword ? "text" : "password"}
+                type={showConfirmPassword ? "text" : "password"}
                 variant="outlined"
                 size="small"
                 fullWidth
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label="toggle password visibility"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        edge="end"
+                      >
+                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }}
               />
             </form>
           </div>

@@ -140,8 +140,8 @@ export default function HomeLayout({
   }
   const menuItems = [
     { text: '首页', icon: <DashboardIcon />, path: '/home' },
-    { text: '功能菜单', icon: <TuneOutlined />, path: '/home/functions' },
     { text: '联系人管理', icon: <PeopleIcon />, path: '/home/users' },
+    { text: '功能菜单', icon: <TuneOutlined />, path: '/home/articles' },
     { text: '设置', icon: <SettingsIcon />, path: '/settings' },
   ];
 
