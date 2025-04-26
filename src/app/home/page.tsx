@@ -12,8 +12,18 @@ const HomePage = () => {
       <Grid container spacing={5}>
         <Grid size={6}>
           <center>
-            <Paper elevation={3} sx={{ width: 300, height: 300, borderRadius: 10 }}>
-              <Image src={"/profile_picture.png"} alt="Vercel" width={300} height={300} />
+            <Paper
+              elevation={3}
+              sx={{
+                width: 300,
+                height: 300,
+                borderRadius: 10,
+                display: 'flex',        // Add this
+                justifyContent: 'center', // Add this
+                alignItems: 'center'      // Add this
+              }}
+            >
+              <Image src={`http://localhost:8080/avatars/${user.avatar}`} alt="Vercel" width={250} height={250} />
             </Paper>
           </center>
         </Grid>
@@ -32,7 +42,8 @@ const HomePage = () => {
             <Card className='flex flex-col w-full space-y-2 mt-8'>
               {selfInfoCell("用户名", user.name)}
               {selfInfoCell("邮箱", user.email)}
-              {selfInfoCell("手机号", user.phone)}
+              {selfInfoCell("余额", user.balance)}
+              {selfInfoCell("生日", user.birthday)}
             </Card>
           </Container>
         </Grid>

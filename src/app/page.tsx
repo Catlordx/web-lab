@@ -54,7 +54,6 @@ const App = () => {
     const req_data = {
       username: username,
       password: password,
-      type: "username"
     }
     const resp = await fetch('http://localhost:8080/api/auth/login', {
       method: 'POST',
@@ -76,16 +75,20 @@ const App = () => {
       setLoading(false)
       return;
     }
-    setUsername(data.username)
-    if (data.token) {
-      localStorage.setItem('authToken', data.token);
-      console.log(localStorage.getItem('authToken'));
-      console.log(data);
+    if (data) {
+      // localStorage.setItem('authToken', data.token);
+      // console.log(localStorage.getItem('authToken'));
 
+      console.log(data);
+      setUsername(data.data.username)
+
+      const birthdayDate = data.data.birthday ? data.data.birthday.split('T')[0] : ''; // Add a check in case birthday is null/undefined
       setUser({
-        name: data.username,
-        email: data.email,
-        phone: data.phonenumber,
+        name: data.data.username,
+        email: data.data.email,
+        balance: '0',
+        avatar: data.data.avatar,
+        birthday: birthdayDate,
       })
 
 
@@ -99,7 +102,7 @@ const App = () => {
       // 延迟跳转，让用户能看到成功提示
       setTimeout(() => {
         router.push('/home')
-      }, 500);
+      }, 3500);
       setLoading(false)
     }
   };
