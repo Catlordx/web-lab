@@ -89,6 +89,7 @@ const App = () => {
         balance: '0',
         avatar: data.data.avatar,
         birthday: birthdayDate,
+        userId: data.data.userId,
       })
 
 
