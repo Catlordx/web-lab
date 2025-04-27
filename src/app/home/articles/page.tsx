@@ -15,59 +15,71 @@ import {
   CircularProgress,
   useMediaQuery,
   useTheme,
-  Button
+  Button,
+  Alert // Import Alert for error display
 } from "@mui/material";
 import { BarChart } from '@mui/x-charts/BarChart';
+import { useRouter } from "next/navigation";
 
+// Updated Author type to match backend DTO
 type Author = {
-  id: number;
+  userId: number; // Changed from id to userId
   name: string;
   articleCount: number;
 };
 
+// Type for the backend response structure
+type PaginatedAuthorsResponse = {
+  content: Author[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+};
+
 const ArticlesManagementPage = () => {
+  const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [authors, setAuthors] = useState<Author[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); // State for error messages
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const rowsPerPage = 5;
+  const rowsPerPage = 5; // Should match the default limit in backend or be passed
 
-  // 模拟获取作者数据
+  // Fetch real author data from the backend
   useEffect(() => {
     const fetchAuthors = async () => {
       setLoading(true);
-      // 这里应该是实际的API调用
-      // const response = await fetch(`/api/authors?page=${page}&limit=${rowsPerPage}`);
-      // const data = await response.json();
+      setError(null); // Reset error before fetching
+      try {
+        // Adjust the URL to your actual backend endpoint if different
+        const response = await fetch(`http://localhost:8080/api/authors?page=${page}&limit=${rowsPerPage}`);
 
-      // 模拟数据
-      setTimeout(() => {
-        // 生成模拟数据
-        const totalAuthors = 23; // 总作者数
-        const mockAuthors = Array(Math.min(rowsPerPage, totalAuthors - (page - 1) * rowsPerPage))
-          .fill(0)
-          .map((_, index) => {
-            const actualIndex = (page - 1) * rowsPerPage + index;
-            return {
-              id: actualIndex + 1,
-              name: `作者${actualIndex + 1}`,
-              articleCount: Math.floor(Math.random() * 20) + 1
-            };
-          });
+        if (!response.ok) {
+          // Handle HTTP errors (e.g., 404, 500)
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
-        setAuthors(mockAuthors);
-        setTotalPages(Math.ceil(totalAuthors / rowsPerPage));
+        const data: PaginatedAuthorsResponse = await response.json();
+
+        setAuthors(data.content);
+        setTotalPages(data.totalPages);
+
+      } catch (err: any) {
+        console.error("Failed to fetch authors:", err);
+        setError(err.message || "Failed to load author data."); // Set error message
+      } finally {
         setLoading(false);
-      }, 500);
+      }
     };
 
     fetchAuthors();
-  }, [page]);
+  }, [page, rowsPerPage]); // Add rowsPerPage as dependency if it can change
 
-  // 准备MUI X Charts所需的数据格式
+  // Prepare MUI X Charts data (no change needed here)
   const chartLabels = authors.map(author => author.name);
   const chartData = authors.map(author => author.articleCount);
 
@@ -75,14 +87,34 @@ const ArticlesManagementPage = () => {
     setPage(value);
   };
 
+  // Function to handle navigation to user's articles (implement actual navigation)
+  const handleManageArticles = (userId: number, authorName: string) => {
+    // Replace alert with actual navigation logic, e.g., using Next.js router
+    // import { useRouter } from 'next/navigation';
+    // const router = useRouter();
+    // router.push(`/home/articles/${userId}`);
+    // alert(`Navigate to manage articles for ${authorName} (User ID: ${userId})`);
+    console.log(`Navigating to manage articles for ${authorName} (User ID: ${userId})`);
+    router.push(`/home/articles/${userId}`); // Navigate to the dynamic route
+    
+  };
+
+
   return (
     <Box className="p-4">
       <Typography variant="h4" className="mb-6 text-center">
-        文章管理
+        文章管理 - 作者概览
       </Typography>
 
+      {/* Display Error Message */}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
       <Box className={`flex ${isMobile ? 'flex-col' : 'flex-row'} gap-4`}>
-        {/* 左侧作者列表 */}
+        {/* Left side: Author List */}
         <Paper className={`p-4 ${isMobile ? 'w-full' : 'w-1/2'}`}>
           <Typography variant="h6" className="mb-4">
             作者列表
@@ -92,50 +124,56 @@ const ArticlesManagementPage = () => {
             <Box className="flex justify-center items-center h-64">
               <CircularProgress />
             </Box>
-          ) : (
+          ) : !error && authors.length > 0 ? ( // Only show table if no error and data exists
             <>
               <TableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>ID</TableCell>
-                      <TableCell>作者名</TableCell>
-                      <TableCell align="right">文章数</TableCell>
-                      <TableCell align="center">操作</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
+                <Table size="small"><TableHead>
+                  <TableRow>
+                    <TableCell>用户ID</TableCell>
+                    <TableCell>作者名</TableCell>
+                    <TableCell align="right">文章数</TableCell>
+                    <TableCell align="center">操作</TableCell>
+                  </TableRow>
+                </TableHead><TableBody>
                     {authors.map((author) => (
-                      <TableRow key={author.id}>
-                        <TableCell>{author.id}</TableCell>
+                      // Use userId for the key
+                      <TableRow key={author.userId} hover>
+                        <TableCell>{author.userId}</TableCell>
                         <TableCell>{author.name}</TableCell>
                         <TableCell align="right">{author.articleCount}</TableCell>
                         <TableCell align="center">
                           <Button
-                            variant="contained"
+                            variant="outlined" // Changed variant for less emphasis
+                            size="small"
                             color="primary"
-                            onClick={() => alert(`编辑作者 ${author.name}`)}
-                            >进入文章管理</Button>
+                            onClick={() => handleManageArticles(author.userId, author.name)}
+                          >
+                            管理文章
+                          </Button>
                         </TableCell>
                       </TableRow>
                     ))}
-                  </TableBody>
-                </Table>
+                  </TableBody></Table>
               </TableContainer>
 
-              <Box className="flex justify-center mt-4">
-                <Pagination
-                  count={totalPages}
-                  page={page}
-                  onChange={handlePageChange}
-                  color="primary"
-                />
-              </Box>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <Box className="flex justify-center mt-4">
+                  <Pagination
+                    count={totalPages}
+                    page={page}
+                    onChange={handlePageChange}
+                    color="primary"
+                  />
+                </Box>
+              )}
             </>
-          )}
+          ) : !error ? ( // No error, but no authors
+            <Typography sx={{ textAlign: 'center', mt: 4 }}>暂无作者数据。</Typography>
+          ) : null /* Error is already displayed above */}
         </Paper>
 
-        {/* 右侧统计图 */}
+        {/* Right side: Statistics Chart */}
         <Paper className={`p-4 ${isMobile ? 'w-full' : 'w-1/2'}`}>
           <Typography variant="h6" className="mb-4">
             作者文章统计图
@@ -145,24 +183,26 @@ const ArticlesManagementPage = () => {
             <Box className="flex justify-center items-center h-64">
               <CircularProgress />
             </Box>
-          ) : (
-            <Box className="h-80">
-              {authors.length > 0 && (
-                <BarChart
-                  xAxis={[{ scaleType: 'band', data: chartLabels }]}
-                  series={[
-                    {
-                      data: chartData,
-                      label: '文章数',
-                      color: '#8884d8',
-                    },
-                  ]}
-                  height={320}
-                  margin={{ top: 10, bottom: 30, left: 40, right: 10 }}
-                />
-              )}
+          ) : !error && authors.length > 0 ? ( // Only show chart if no error and data exists
+            <Box sx={{ height: 320 }}> {/* Ensure Box has height */}
+              <BarChart
+                xAxis={[{ scaleType: 'band', data: chartLabels, tickLabelStyle: { angle: -30, textAnchor: 'end', fontSize: 10 } }]} // Rotate labels if needed
+                series={[
+                  {
+                    data: chartData,
+                    label: '文章数',
+                    // color: '#8884d8', // You can customize color
+                  },
+                ]}
+                height={320} // Match Box height
+                margin={{ top: 20, bottom: 50, left: 40, right: 10 }} // Adjust margins
+              // Optional: Add tooltips or other features
+              // tooltip={{ trigger: 'item' }}
+              />
             </Box>
-          )}
+          ) : !error ? ( // No error, but no data for chart
+            <Typography sx={{ textAlign: 'center', mt: 4 }}>无数据可供统计。</Typography>
+          ) : null /* Error is already displayed above */}
         </Paper>
       </Box>
     </Box>

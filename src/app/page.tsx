@@ -211,7 +211,9 @@ const App = () => {
         </div>
         <div className="mt-4 bg-gray-400 flex flex-col md:flex-row md:mt-2 w-full">
           <div className="w-full md:w-1/2 text-center mt-0 md:my-2">
-            <Button variant="text" sx={{ color: "white" }}>注册用户</Button>
+            <Button variant="text" sx={{ color: "white" }} onClick={() => {
+              router.push('/register')
+            }}>注册用户</Button>
           </div>
 
           <div className="w-full md:w-1/2 text-center mb-0 md:my-2">
