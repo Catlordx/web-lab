@@ -56,7 +56,16 @@ const ArticlesManagementPage = () => {
       setError(null); // Reset error before fetching
       try {
         // Adjust the URL to your actual backend endpoint if different
-        const response = await fetch(`http://localhost:8080/api/authors?page=${page}&limit=${rowsPerPage}`);
+        console.log(localStorage.getItem('token'));
+
+        const response = await fetch(`http://localhost:8080/api/authors?page=${page}&limit=${rowsPerPage}`,
+          {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            }
+          }
+        );
 
         if (!response.ok) {
           // Handle HTTP errors (e.g., 404, 500)
@@ -68,6 +77,7 @@ const ArticlesManagementPage = () => {
         setAuthors(data.content);
         setTotalPages(data.totalPages);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         console.error("Failed to fetch authors:", err);
         setError(err.message || "Failed to load author data."); // Set error message
@@ -96,7 +106,7 @@ const ArticlesManagementPage = () => {
     // alert(`Navigate to manage articles for ${authorName} (User ID: ${userId})`);
     console.log(`Navigating to manage articles for ${authorName} (User ID: ${userId})`);
     router.push(`/home/articles/${userId}`); // Navigate to the dynamic route
-    
+
   };
 
 

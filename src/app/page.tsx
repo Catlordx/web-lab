@@ -91,6 +91,7 @@ const App = () => {
         birthday: birthdayDate,
         userId: data.data.userId,
       })
+      localStorage.setItem('token', data.token)
 
 
       // 显示登录成功提示

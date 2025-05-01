@@ -230,8 +230,9 @@ const UserManagementPage = () => {
       // const token = localStorage.getItem('authToken');
       const response = await fetch('http://localhost:8080/api/users/all', {
         headers: {
-          // 'Authorization': `Bearer ${token}`,
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
+
         }
       })
       if (!response.ok) {
@@ -283,17 +284,21 @@ const UserManagementPage = () => {
         address: newUser.address,
         zip: newUser.zip,
       };
-  
+      console.log(updatedUserData);
+
+
+
       const response = await fetch(`http://localhost:8080/api/users/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(updatedUserData),
       });
-  
+
       const result = await response.text(); // 获取返回的字符串
-  
+
       if (response.ok && result === "Success") {
         setOpenAddDialog(false);
         showSnackbar('用户信息已成功添加', 'success');
@@ -335,12 +340,12 @@ const UserManagementPage = () => {
         updatedAt: birthday || newUser.updatedAt
       };
       console.log(newUser.updatedAt);
-      
+
       const respo = await fetch(`http://localhost:8080/api/users/${selectedUser.infoId}`, {
         method: 'PUT',
         headers: {
-          // 'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
         body: JSON.stringify(updatedUserData)
       })
@@ -394,25 +399,26 @@ const UserManagementPage = () => {
       try {
         // 显示加载状态
         setLoading(true);
-  
+
         // 调用删除用户 API
         const response = await fetch(`http://localhost:8080/api/users/${selectedUser.infoId}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
           },
         });
-  
+
         // 检查响应
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({}));
           throw new Error(errorData.message || '删除用户失败');
         }
-  
+
         // 前端状态更新
         setUsers(users.filter(user => user.infoId !== selectedUser.infoId));
         setFilteredUsers(filteredUsers.filter(user => user.infoId !== selectedUser.infoId));
-  
+
         setOpenDeleteDialog(false);
         showSnackbar('用户已成功删除', 'success');
       } catch (error: any) {
@@ -628,81 +634,81 @@ const UserManagementPage = () => {
             请填写新用户的信息。
           </DialogContentText>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
 
-            <DatePicker 
-              label="日期"
-              value={birthday}
-              onChange={(newValue) => setBirthday(newValue)}
-              slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} // 设置为必填和全宽
-            />
-            <TextField
-              label="姓名"
-              fullWidth
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              required
-            />
-
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel>省份</InputLabel>
-                <Select
-                  value={newUser.province || ''}
-                  label="省份"
-                  onChange={(e) => {
-                    const selectedProvince = e.target.value as string;
-                    // 更新省份，并清空城市(除非当前城市属于新选的省)
-                    const provinceItem = provinceData.find(p => p.province === selectedProvince);
-                    const cityExists = provinceItem?.cities.includes(newUser.city || '');
-
-                    setNewUser({
-                      ...newUser,
-                      province: selectedProvince,
-                      city: cityExists ? newUser.city : ''
-                    });
-                  }}
-                >
-                  {provinceData.map((p) => (
-                    <MenuItem key={p.province} value={p.province}>{p.province}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth>
-                <InputLabel>城市</InputLabel>
-                <Select
-                  value={newUser.city || ''}
-                  label="城市"
-                  disabled={!newUser.province}
-                  onChange={(e) => setNewUser({ ...newUser, city: e.target.value as string })}
-                >
-                  {newUser.province &&
-                    provinceData
-                      .find(p => p.province === newUser.province)
-                      ?.cities.map((city) => (
-                        <MenuItem key={city} value={city}>{city}</MenuItem>
-                      ))
-                  }
-                </Select>
-              </FormControl>
-              <TextField
-                label="地址"
-                fullWidth
-                value={newUser.address || ''} // 确保值始终是字符串
-
-                onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
-                required
+              <DatePicker
+                label="日期"
+                value={birthday}
+                onChange={(newValue) => setBirthday(newValue)}
+                slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} // 设置为必填和全宽
               />
               <TextField
-                label="邮编"
+                label="姓名"
                 fullWidth
-                value={newUser.zip || ''}
-                onChange={(e) => setNewUser({ ...newUser, zip: e.target.value })}
+                value={newUser.name}
+                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                 required
               />
+
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>省份</InputLabel>
+                  <Select
+                    value={newUser.province || ''}
+                    label="省份"
+                    onChange={(e) => {
+                      const selectedProvince = e.target.value as string;
+                      // 更新省份，并清空城市(除非当前城市属于新选的省)
+                      const provinceItem = provinceData.find(p => p.province === selectedProvince);
+                      const cityExists = provinceItem?.cities.includes(newUser.city || '');
+
+                      setNewUser({
+                        ...newUser,
+                        province: selectedProvince,
+                        city: cityExists ? newUser.city : ''
+                      });
+                    }}
+                  >
+                    {provinceData.map((p) => (
+                      <MenuItem key={p.province} value={p.province}>{p.province}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth>
+                  <InputLabel>城市</InputLabel>
+                  <Select
+                    value={newUser.city || ''}
+                    label="城市"
+                    disabled={!newUser.province}
+                    onChange={(e) => setNewUser({ ...newUser, city: e.target.value as string })}
+                  >
+                    {newUser.province &&
+                      provinceData
+                        .find(p => p.province === newUser.province)
+                        ?.cities.map((city) => (
+                          <MenuItem key={city} value={city}>{city}</MenuItem>
+                        ))
+                    }
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="地址"
+                  fullWidth
+                  value={newUser.address || ''} // 确保值始终是字符串
+
+                  onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
+                  required
+                />
+                <TextField
+                  label="邮编"
+                  fullWidth
+                  value={newUser.zip || ''}
+                  onChange={(e) => setNewUser({ ...newUser, zip: e.target.value })}
+                  required
+                />
+              </Box>
             </Box>
-          </Box>
           </LocalizationProvider>
         </DialogContent>
         <DialogActions>
@@ -722,79 +728,79 @@ const UserManagementPage = () => {
         <DialogTitle>编辑用户</DialogTitle>
         <DialogContent>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-          <DatePicker 
-              label="日期"
-              value={birthday}
-              onChange={(newValue) => setBirthday(newValue)}
-              slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} // 设置为必填和全宽
-            />
-            <TextField
-              label="姓名"
-              fullWidth
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              required
-            />
-
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <FormControl fullWidth>
-                <InputLabel>省份</InputLabel>
-                <Select
-                  value={newUser.province || ''}
-                  label="省份"
-                  onChange={(e) => {
-                    const selectedProvince = e.target.value as string;
-                    // 更新省份，并清空城市(除非当前城市属于新选的省)
-                    const provinceItem = provinceData.find(p => p.province === selectedProvince);
-                    const cityExists = provinceItem?.cities.includes(newUser.city || '');
-
-                    setNewUser({
-                      ...newUser,
-                      province: selectedProvince,
-                      city: cityExists ? newUser.city : ''
-                    });
-                  }}
-                >
-                  {provinceData.map((p) => (
-                    <MenuItem key={p.province} value={p.province}>{p.province}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl fullWidth>
-                <InputLabel>城市</InputLabel>
-                <Select
-                  value={newUser.city || ''}
-                  label="城市"
-                  disabled={!newUser.province}
-                  onChange={(e) => setNewUser({ ...newUser, city: e.target.value as string })}
-                >
-                  {newUser.province &&
-                    provinceData
-                      .find(p => p.province === newUser.province)
-                      ?.cities.map((city) => (
-                        <MenuItem key={city} value={city}>{city}</MenuItem>
-                      ))
-                  }
-                </Select>
-              </FormControl>
-              <TextField
-                label="地址"
-                fullWidth
-                value={newUser.address|| ''}
-                onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
-                required
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+              <DatePicker
+                label="日期"
+                value={birthday}
+                onChange={(newValue) => setBirthday(newValue)}
+                slotProps={{ textField: { size: 'small', fullWidth: true, required: true } }} // 设置为必填和全宽
               />
               <TextField
-                label="邮编"
+                label="姓名"
                 fullWidth
-                value={newUser.zip || ''}
-                onChange={(e) => setNewUser({ ...newUser, zip: e.target.value })}
+                value={newUser.name}
+                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
                 required
               />
+
+              <Box sx={{ display: 'flex', gap: 2 }}>
+                <FormControl fullWidth>
+                  <InputLabel>省份</InputLabel>
+                  <Select
+                    value={newUser.province || ''}
+                    label="省份"
+                    onChange={(e) => {
+                      const selectedProvince = e.target.value as string;
+                      // 更新省份，并清空城市(除非当前城市属于新选的省)
+                      const provinceItem = provinceData.find(p => p.province === selectedProvince);
+                      const cityExists = provinceItem?.cities.includes(newUser.city || '');
+
+                      setNewUser({
+                        ...newUser,
+                        province: selectedProvince,
+                        city: cityExists ? newUser.city : ''
+                      });
+                    }}
+                  >
+                    {provinceData.map((p) => (
+                      <MenuItem key={p.province} value={p.province}>{p.province}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth>
+                  <InputLabel>城市</InputLabel>
+                  <Select
+                    value={newUser.city || ''}
+                    label="城市"
+                    disabled={!newUser.province}
+                    onChange={(e) => setNewUser({ ...newUser, city: e.target.value as string })}
+                  >
+                    {newUser.province &&
+                      provinceData
+                        .find(p => p.province === newUser.province)
+                        ?.cities.map((city) => (
+                          <MenuItem key={city} value={city}>{city}</MenuItem>
+                        ))
+                    }
+                  </Select>
+                </FormControl>
+                <TextField
+                  label="地址"
+                  fullWidth
+                  value={newUser.address || ''}
+                  onChange={(e) => setNewUser({ ...newUser, address: e.target.value })}
+                  required
+                />
+                <TextField
+                  label="邮编"
+                  fullWidth
+                  value={newUser.zip || ''}
+                  onChange={(e) => setNewUser({ ...newUser, zip: e.target.value })}
+                  required
+                />
+              </Box>
             </Box>
-          </Box>
           </LocalizationProvider>
         </DialogContent>
         <DialogActions>

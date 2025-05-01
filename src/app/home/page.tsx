@@ -18,9 +18,9 @@ const HomePage = () => {
                 width: 300,
                 height: 300,
                 borderRadius: 10,
-                display: 'flex',        // Add this
-                justifyContent: 'center', // Add this
-                alignItems: 'center'      // Add this
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
               }}
             >
               <Image src={`http://localhost:8080/avatars/${user.avatar}`} alt="Vercel" width={250} height={250} />

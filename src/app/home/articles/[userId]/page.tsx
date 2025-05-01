@@ -91,15 +91,19 @@ const AuthorArticlesPage = () => {
     }
     setLoadingAuthor(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${userId}`,{
+      const response = await fetch(`http://localhost:8080/api/users/${userId}`, {
         method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
       }); // Use your actual user API endpoint
       if (!response.ok) {
         throw new Error(`Failed to fetch author details (Status: ${response.status})`);
       }
       const data: AuthorDetails = await response.json();
       console.log("Fetched author details:", data);
-      
+
       setAuthor({
         userId: data.userId,
         username: data.username,
@@ -109,6 +113,7 @@ const AuthorArticlesPage = () => {
         money: data.money
       })
       // setAuthor(data);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching author details:", err);
       setError(err.message || "Could not load author information.");
@@ -125,7 +130,15 @@ const AuthorArticlesPage = () => {
     }
     setLoadingArticles(true);
     try {
-      const response = await fetch(`http://localhost:8080/api/articles/user/${userId}`);
+      const response = await fetch(`http://localhost:8080/api/articles/user/${userId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          }
+        }
+      );
       if (!response.ok) {
         throw new Error(`Failed to fetch articles (Status: ${response.status})`);
       }
@@ -138,6 +151,7 @@ const AuthorArticlesPage = () => {
       }));
       setArticles(formattedData);
       setError(null); // Clear previous errors if articles fetch succeeds
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching articles:", err);
       setError(err.message || "Could not load articles.");
@@ -171,9 +185,9 @@ const AuthorArticlesPage = () => {
     // Find the original article data to pre-fill content accurately if needed
     const originalArticle = articles.find(a => a.articleId === article.articleId);
     setArticleFormData({
-        title: article.title,
-        // Fetch full content if the table only shows a snippet
-        content: originalArticle?.content || article.content || '' // Fallback
+      title: article.title,
+      // Fetch full content if the table only shows a snippet
+      content: originalArticle?.content || article.content || '' // Fallback
     });
     setOpenAddEditDialog(true);
   };
@@ -193,14 +207,17 @@ const AuthorArticlesPage = () => {
     const url = isEditing ? `http://localhost:8080/api/articles/${selectedArticle?.articleId}` : 'http://localhost:8080/api/articles';
     const method = isEditing ? 'PUT' : 'POST';
     const bodyPayload = isEditing
-        ? articleFormData // Send only updated fields for PUT
-        : { ...articleFormData, userId: userId }; // Include userId for POST
+      ? articleFormData // Send only updated fields for PUT
+      : { ...articleFormData, userId: userId }; // Include userId for POST
     console.log("123123123");
-    
+
     try {
       const response = await fetch(url, {
         method: method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
         body: JSON.stringify(bodyPayload),
       });
 
@@ -208,10 +225,11 @@ const AuthorArticlesPage = () => {
         const errorData = await response.text(); // Get text first
         let errorMessage = `Failed to ${isEditing ? 'update' : 'add'} article`;
         try {
-            const jsonData = JSON.parse(errorData); // Try parsing JSON
-            errorMessage = jsonData.message || errorMessage;
+          const jsonData = JSON.parse(errorData); // Try parsing JSON
+          errorMessage = jsonData.message || errorMessage;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e) {
-            errorMessage = errorData || errorMessage; // Use text if not JSON
+          errorMessage = errorData || errorMessage; // Use text if not JSON
         }
         throw new Error(`${errorMessage} (Status: ${response.status})`);
       }
@@ -221,6 +239,7 @@ const AuthorArticlesPage = () => {
       showSnackbar(`Article successfully ${isEditing ? 'updated' : 'added'}!`, 'success');
       handleCloseAddEditDialog();
       fetchArticles(); // Refresh the articles list
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(`Error ${isEditing ? 'updating' : 'adding'} article:`, err);
       showSnackbar(err.message || `Could not ${isEditing ? 'update' : 'add'} article.`, 'error');
@@ -228,38 +247,43 @@ const AuthorArticlesPage = () => {
   };
 
   // --- Delete Handlers ---
-   const handleOpenDeleteDialog = (article: Article) => {
-     setArticleToDelete(article);
-     setOpenDeleteDialog(true);
-   };
+  const handleOpenDeleteDialog = (article: Article) => {
+    setArticleToDelete(article);
+    setOpenDeleteDialog(true);
+  };
 
-   const handleCloseDeleteDialog = () => {
-     setOpenDeleteDialog(false);
-     setArticleToDelete(null);
-   };
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setArticleToDelete(null);
+  };
 
-   const handleConfirmDelete = async () => {
-     if (!articleToDelete) return;
+  const handleConfirmDelete = async () => {
+    if (!articleToDelete) return;
 
-     try {
-       const response = await fetch(`http://localhost:8080/api/articles/${articleToDelete.articleId}`, {
-         method: 'DELETE',
-       });
+    try {
+      const response = await fetch(`http://localhost:8080/api/articles/${articleToDelete.articleId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        }
+      });
 
-       if (!response.ok) {
-         // Handle cases like not found (404) or other errors
-         throw new Error(`Failed to delete article (Status: ${response.status})`);
-       }
+      if (!response.ok) {
+        // Handle cases like not found (404) or other errors
+        throw new Error(`Failed to delete article (Status: ${response.status})`);
+      }
 
-       showSnackbar('Article successfully deleted!', 'success');
-       handleCloseDeleteDialog();
-       fetchArticles(); // Refresh list
-     } catch (err: any) {
-       console.error("Error deleting article:", err);
-       showSnackbar(err.message || "Could not delete article.", 'error');
-       handleCloseDeleteDialog(); // Close dialog even on error
-     }
-   };
+      showSnackbar('Article successfully deleted!', 'success');
+      handleCloseDeleteDialog();
+      fetchArticles(); // Refresh list
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      console.error("Error deleting article:", err);
+      showSnackbar(err.message || "Could not delete article.", 'error');
+      handleCloseDeleteDialog(); // Close dialog even on error
+    }
+  };
 
 
   // --- DataGrid Columns ---
@@ -299,12 +323,12 @@ const AuthorArticlesPage = () => {
 
   if (error && !author) { // Critical error loading author
     return (
-       <Box sx={{ p: 3 }}>
-         <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ mb: 2 }}>
-           Back
-         </Button>
-         <Alert severity="error">{error}</Alert>
-       </Box>
+      <Box sx={{ p: 3 }}>
+        <Button startIcon={<ArrowBackIcon />} onClick={() => router.back()} sx={{ mb: 2 }}>
+          Back
+        </Button>
+        <Alert severity="error">{error}</Alert>
+      </Box>
     );
   }
 
@@ -323,30 +347,30 @@ const AuthorArticlesPage = () => {
             {!author.avatar && author.username ? author.username[0].toUpperCase() : null}
           </Avatar>
           <Box>
-          <Typography variant="h5">{author.username}</Typography>
+            <Typography variant="h5">{author.username}</Typography>
             <Typography variant="body2" color="text.secondary">User ID: {author.userId}</Typography>
             {/* Corrected labels */}
-            <Typography variant="body2" color="text.secondary">Email: {author.email}</Typography> 
-            <Typography variant="body2" color="text.secondary">Balance: {author.money}</Typography> 
+            <Typography variant="body2" color="text.secondary">Email: {author.email}</Typography>
+            <Typography variant="body2" color="text.secondary">Balance: {author.money}</Typography>
             <Typography variant="body2" color="text.secondary">
               {/* Check if birthday exists and convert string to Date before formatting */}
-              Birthday: {author.birthday ? new Date(author.birthday).toLocaleDateString() : 'N/A'} 
+              Birthday: {author.birthday ? new Date(author.birthday).toLocaleDateString() : 'N/A'}
             </Typography>
           </Box>
         </Paper>
       )}
 
       {/* Add Article Button */}
-       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-         <Button
-           variant="contained"
-           startIcon={<AddIcon />}
-           onClick={handleOpenAddDialog}
-           disabled={!author} // Disable if author info failed to load
-         >
-           Add New Article
-         </Button>
-       </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={handleOpenAddDialog}
+          disabled={!author} // Disable if author info failed to load
+        >
+          Add New Article
+        </Button>
+      </Box>
 
       {/* Articles Table */}
       <Paper sx={{ p: 2 }}>
@@ -356,9 +380,9 @@ const AuthorArticlesPage = () => {
         {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>} {/* Show non-critical errors here */}
         <Box sx={{ height: 500, width: '100%' }}>
           {loadingArticles ? (
-             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-               <CircularProgress />
-             </Box>
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+              <CircularProgress />
+            </Box>
           ) : (
             <DataGrid
               rows={articles}
@@ -417,33 +441,33 @@ const AuthorArticlesPage = () => {
         </DialogActions>
       </Dialog>
 
-       {/* Delete Confirmation Dialog */}
-       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-         <DialogTitle>Confirm Deletion</DialogTitle>
-         <DialogContent>
-           <Typography>
-             Are you sure you want to delete the article titled "{articleToDelete?.title}"? This action cannot be undone.
-           </Typography>
-         </DialogContent>
-         <DialogActions>
-           <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
-           <Button onClick={handleConfirmDelete} color="error" variant="contained">
-             Delete
-           </Button>
-         </DialogActions>
-       </Dialog>
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
+        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete the article titled "{articleToDelete?.title}"? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-       {/* Snackbar for feedback */}
-       <Snackbar
-         open={snackbar.open}
-         autoHideDuration={6000}
-         onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
-         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-       >
-         <Alert onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} severity={snackbar.severity} sx={{ width: '100%' }}>
-           {snackbar.message}
-         </Alert>
-       </Snackbar>
+      {/* Snackbar for feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar(prev => ({ ...prev, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert onClose={() => setSnackbar(prev => ({ ...prev, open: false }))} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
 
     </Box>
   );
