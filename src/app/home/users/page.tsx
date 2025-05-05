@@ -227,12 +227,10 @@ const UserManagementPage = () => {
     setLoading(true);
     setError(null);
     try {
-      // const token = localStorage.getItem('authToken');
       const response = await fetch('http://localhost:8080/api/users/all', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Content-Type': 'application/json'
-
         }
       })
       if (!response.ok) {
@@ -285,9 +283,6 @@ const UserManagementPage = () => {
         zip: newUser.zip,
       };
       console.log(updatedUserData);
-
-
-
       const response = await fetch(`http://localhost:8080/api/users/add`, {
         method: 'POST',
         headers: {
@@ -613,12 +608,6 @@ const UserManagementPage = () => {
               toolbarExportLabel: '导出',
               toolbarExportCSV: '导出为CSV',
               toolbarExportPrint: '打印',
-              // columnsPanelTextFieldLabel: '查找列',
-              // columnsPanelTextFieldPlaceholder: '列名',
-              // columnsPanelDragIconLabel: '重排列',
-              // columnsPanelShowAllButton: '显示所有',
-              // columnsPanelHideAllButton: '隐藏所有',
-              // ...更多本地化文本
             }}
           />
 
@@ -871,9 +860,6 @@ const UserManagementPage = () => {
                 <Typography variant="body2" color="text.secondary">邮编</Typography>
                 <Typography variant="body1">{selectedUser.zip}</Typography>
               </Box>
-
-
-
             </Box>
           )}
         </DialogContent>

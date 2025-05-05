@@ -268,34 +268,31 @@ const AuthorArticlesPage = () => {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
         }
       });
-
       if (!response.ok) {
-        // Handle cases like not found (404) or other errors
         throw new Error(`Failed to delete article (Status: ${response.status})`);
       }
-
       showSnackbar('Article successfully deleted!', 'success');
       handleCloseDeleteDialog();
-      fetchArticles(); // Refresh list
+      fetchArticles();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error deleting article:", err);
       showSnackbar(err.message || "Could not delete article.", 'error');
-      handleCloseDeleteDialog(); // Close dialog even on error
+      handleCloseDeleteDialog();
     }
   };
 
 
   // --- DataGrid Columns ---
   const columns: GridColDef<Article>[] = [
-    { field: 'articleId', headerName: 'ID', width: 90 },
-    { field: 'title', headerName: 'Title', flex: 1, minWidth: 200 },
+    { field: 'articleId', headerName: '文章序号', width: 90 },
+    { field: 'title', headerName: '标题', flex: 1, minWidth: 200 },
     // { field: 'content', headerName: 'Content', flex: 2, minWidth: 300 }, // Maybe too long for table
-    { field: 'createdAt', headerName: 'Created At', width: 180 },
-    { field: 'updatedAt', headerName: 'Updated At', width: 180 },
+    { field: 'createdAt', headerName: '创建时间', width: 180 },
+    { field: 'updatedAt', headerName: '更新时间', width: 180 },
     {
       field: 'actions',
-      headerName: 'Actions',
+      headerName: '操作',
       width: 150,
       sortable: false,
       disableColumnMenu: true,
@@ -336,7 +333,7 @@ const AuthorArticlesPage = () => {
     <Box sx={{ p: 3 }}>
       {/* Back Button */}
       <Button startIcon={<ArrowBackIcon />} onClick={() => router.push('/home/articles')} sx={{ mb: 2 }}>
-        Back to Authors List
+      返回至作者列表
       </Button>
 
       {/* Author Info Header */}
@@ -348,10 +345,10 @@ const AuthorArticlesPage = () => {
           </Avatar>
           <Box>
             <Typography variant="h5">{author.username}</Typography>
-            <Typography variant="body2" color="text.secondary">User ID: {author.userId}</Typography>
+            <Typography variant="body2" color="text.secondary">用户序号: {author.userId}</Typography>
             {/* Corrected labels */}
-            <Typography variant="body2" color="text.secondary">Email: {author.email}</Typography>
-            <Typography variant="body2" color="text.secondary">Balance: {author.money}</Typography>
+            <Typography variant="body2" color="text.secondary">邮箱: {author.email}</Typography>
+            <Typography variant="body2" color="text.secondary">余额: {author.money || 0}</Typography>
             <Typography variant="body2" color="text.secondary">
               {/* Check if birthday exists and convert string to Date before formatting */}
               Birthday: {author.birthday ? new Date(author.birthday).toLocaleDateString() : 'N/A'}
@@ -368,14 +365,14 @@ const AuthorArticlesPage = () => {
           onClick={handleOpenAddDialog}
           disabled={!author} // Disable if author info failed to load
         >
-          Add New Article
+        新增文章
         </Button>
       </Box>
 
       {/* Articles Table */}
       <Paper sx={{ p: 2 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
-          {author?.username}'s Articles
+          {author?.username}的文章
         </Typography>
         {error && <Alert severity="warning" sx={{ mb: 2 }}>{error}</Alert>} {/* Show non-critical errors here */}
         <Box sx={{ height: 500, width: '100%' }}>
@@ -397,6 +394,29 @@ const AuthorArticlesPage = () => {
               slotProps={{ toolbar: { showQuickFilter: true } }}
               disableRowSelectionOnClick
               autoHeight={false} // Use fixed height from Box
+              localeText={{
+                MuiTablePagination: {
+                  labelRowsPerPage: '每页行数:',
+                  labelDisplayedRows: ({ from, to, count }) =>
+                    `${from}-${to} 共 ${count !== -1 ? count : `超过 ${to}`}`
+                },
+                toolbarDensity: '密度',
+                toolbarDensityLabel: '密度',
+                toolbarDensityCompact: '紧凑',
+                toolbarDensityStandard: '标准',
+                toolbarDensityComfortable: '舒适',
+                toolbarColumns: '列',
+                toolbarColumnsLabel: '选择列',
+                toolbarFilters: '筛选器',
+                toolbarFiltersLabel: '显示筛选器',
+                toolbarFiltersTooltipHide: '隐藏筛选器',
+                toolbarFiltersTooltipShow: '显示筛选器',
+                toolbarQuickFilterPlaceholder: '搜索...',
+                toolbarExport: '导出',
+                toolbarExportLabel: '导出',
+                toolbarExportCSV: '导出为CSV',
+                toolbarExportPrint: '打印',
+              }}
             />
           )}
         </Box>
@@ -404,13 +424,13 @@ const AuthorArticlesPage = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={openAddEditDialog} onClose={handleCloseAddEditDialog} maxWidth="md" fullWidth>
-        <DialogTitle>{isEditing ? 'Edit Article' : 'Add New Article'}</DialogTitle>
+        <DialogTitle>{isEditing ? '编辑文章' : '新增文章'}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
             name="title"
-            label="Article Title"
+            label="文章标题"
             type="text"
             fullWidth
             variant="outlined"
@@ -422,7 +442,7 @@ const AuthorArticlesPage = () => {
           <TextField
             margin="dense"
             name="content"
-            label="Article Content"
+            label="文章内容"
             type="text"
             fullWidth
             variant="outlined"
@@ -434,25 +454,26 @@ const AuthorArticlesPage = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseAddEditDialog}>Cancel</Button>
+          <Button onClick={handleCloseAddEditDialog}>取消</Button>
           <Button onClick={handleSaveArticle} variant="contained">
-            {isEditing ? 'Save Changes' : 'Add Article'}
+            {isEditing ? '保存更改' : '新增文章'}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDeleteDialog} onClose={handleCloseDeleteDialog}>
-        <DialogTitle>Confirm Deletion</DialogTitle>
+        <DialogTitle>确认删除</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete the article titled "{articleToDelete?.title}"? This action cannot be undone.
+            {/* Are you sure you want to delete the article titled "{articleToDelete?.title}"? This action cannot be undone. */}
+            确定要删除标题为 "{articleToDelete?.title}" 的文章吗？此操作无法撤销。
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeleteDialog}>Cancel</Button>
+          <Button onClick={handleCloseDeleteDialog}>取消</Button>
           <Button onClick={handleConfirmDelete} color="error" variant="contained">
-            Delete
+            删除
           </Button>
         </DialogActions>
       </Dialog>
